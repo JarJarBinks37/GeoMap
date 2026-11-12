@@ -75,6 +75,7 @@ export function GlobeCanvas({
     mount.appendChild(renderer.domElement);
 
     const globe = new ThreeGlobe()
+      .globeCurvatureResolution(0.5)
       .showAtmosphere(true)
       .atmosphereColor('#78bca9')
       .atmosphereAltitude(0.16)
@@ -83,11 +84,32 @@ export function GlobeCanvas({
 
     const globeMaterial = globe.globeMaterial() as THREE.MeshPhongMaterial;
     const textureLoader = new THREE.TextureLoader();
-    const earthTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/earth.jpg`);
+    const earthTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/earth.jpg`, (texture) => {
+      const source = texture.image as HTMLImageElement;
+      const canvas = document.createElement('canvas');
+      canvas.width = source.naturalWidth;
+      canvas.height = source.naturalHeight;
+      const context = canvas.getContext('2d');
+      if (!context) return;
+      context.drawImage(source, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        const r = pixels.data[i], g = pixels.data[i + 1], b = pixels.data[i + 2];
+        const whiteness = Math.max(0, Math.min(1, (Math.min(r, g, b) - 145) / 80)) * 0.45;
+        pixels.data[i] = r * (1 - whiteness) + 145 * whiteness;
+        pixels.data[i + 1] = g * (1 - whiteness) + 151 * whiteness;
+        pixels.data[i + 2] = b * (1 - whiteness) + 145 * whiteness;
+      }
+      context.putImageData(pixels, 0, 0);
+      (texture as THREE.Texture).image = canvas;
+      texture.needsUpdate = true;
+    });
     earthTexture.colorSpace = THREE.SRGBColorSpace;
     const elevationTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/elevation.png`);
     globeMaterial.map = earthTexture;
     globeMaterial.bumpMap = elevationTexture;
+    globeMaterial.displacementMap = elevationTexture;
+    globeMaterial.displacementScale = 6;
     globeMaterial.bumpScale = 1.5;
     globeMaterial.color = new THREE.Color('#ffffff');
     globeMaterial.shininess = 4;
@@ -192,6 +214,7 @@ export function GlobeCanvas({
     controls.autoRotate = autoRotate;
     const material = globe.globeMaterial() as THREE.MeshPhongMaterial;
     material.bumpScale = mountains ? relief * 1.5 : 0;
+    material.displacementScale = mountains ? relief * 6 : 0;
     globe
       .showAtmosphere(atmosphere)
       .polygonCapColor((item: GeoFeature) => {

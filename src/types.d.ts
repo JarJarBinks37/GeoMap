@@ -9,6 +9,7 @@ declare module 'three-globe' {
   import { Object3D, Material } from 'three';
   export default class ThreeGlobe extends Object3D {
     globeMaterial(): Material;
+    globeCurvatureResolution(value: number): this;
     showAtmosphere(value?: boolean): this;
     atmosphereColor(value?: string): this;
     atmosphereAltitude(value?: number): this;

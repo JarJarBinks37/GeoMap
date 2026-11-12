@@ -54,7 +54,7 @@ jobs:
         run: |
           for attempt in {1..12}; do
             status=$(curl --silent --location --output /tmp/geomap.html --write-out "%{http_code}" "$SITE_URL")
-            if [ "$status" = "200" ] && grep --quiet "Terra — World Field Guide" /tmp/geomap.html; then
+            if [ "$status" = "200" ] && grep --quiet "Country Club — World Field Guide" /tmp/geomap.html; then
               asset_path=$(grep --only-matching --extended-regexp 'src="[^"]+\.js"' /tmp/geomap.html | head -1 | cut -d'"' -f2)
               curl --fail --silent --show-error "https://jarjarbinks37.github.io${asset_path}" --output /dev/null
               echo "Verified $SITE_URL and ${asset_path}"

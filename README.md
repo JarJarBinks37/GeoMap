@@ -1,4 +1,4 @@
-# Terra — World Field Guide
+# Country Club — World Field Guide
 
 An interactive geographic explorer with a tactile 3D globe and sortable country index.
 
@@ -24,4 +24,4 @@ The browser tests use Chromium installed at `/usr/bin/chromium` in the Codex clo
 
 Country, population, elevation, coastline, and flag data are bundled from the installed reference datasets so the app does not depend on a runtime API. Capital populations are clearly marked as rounded prototype estimates. Geographic figures can vary by source and methodology.
 
-Globe imagery and elevation texture are bundled from the three-globe example assets. The elevation layer uses shaded relief (a bump map), not displaced 3D terrain geometry.
+Globe imagery and elevation texture are bundled from the three-globe example assets. The terrain layer uses an exaggerated elevation displacement map and shaded relief.

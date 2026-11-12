@@ -18,10 +18,10 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={() => setView('globe')} aria-label="Terra home">
+        <button className="brand" onClick={() => setView('globe')} aria-label="Country Club home">
           <span className="brand-mark"><Globe2 size={19} strokeWidth={1.8} /></span>
           <span className="brand-copy">
-            <strong>TERRA</strong>
+            <strong>COUNTRY CLUB</strong>
             <small>WORLD FIELD GUIDE</small>
           </span>
         </button>
