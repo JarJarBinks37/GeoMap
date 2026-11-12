@@ -156,7 +156,7 @@ export function GlobeCanvas({
     const resize = () => {
       const { width, height } = mount.getBoundingClientRect();
       if (!width || !height) return;
-      renderer.setSize(width, height, false);
+      renderer.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };

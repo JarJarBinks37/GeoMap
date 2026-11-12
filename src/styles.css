@@ -122,16 +122,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   min-height: calc(100vh - 108px);
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 57% 47%, rgba(38, 97, 82, .22), transparent 32%),
-    radial-gradient(circle at 10% 85%, rgba(112, 78, 41, .14), transparent 30%),
-    #07110e;
+  background: #020307;
 }
 
 .starfield, .starfield::before, .starfield::after { position: absolute; inset: 0; pointer-events: none; }
-.starfield { opacity: .55; background-image: radial-gradient(circle, rgba(221,232,217,.5) 0 1px, transparent 1.3px); background-size: 94px 94px; background-position: 13px 18px; mask-image: linear-gradient(to bottom, black, transparent 86%); }
-.starfield::before { content: ""; background-image: radial-gradient(circle, rgba(227,182,92,.4) 0 1px, transparent 1.2px); background-size: 137px 137px; background-position: 55px 4px; }
-.starfield::after { content: ""; background: repeating-radial-gradient(circle at 54% 50%, transparent 0 129px, rgba(211,221,207,.03) 130px, transparent 131px); }
+.starfield { opacity: .85; background-image: radial-gradient(1px 1px at 18px 30px, #fff 90%, transparent), radial-gradient(1px 1px at 82px 67px, #9dbfea 90%, transparent), radial-gradient(1.5px 1.5px at 142px 112px, #fff 85%, transparent), radial-gradient(1px 1px at 205px 24px, #d6c8af 90%, transparent); background-size: 251px 173px; }
+.starfield::before { content: ""; opacity: .6; background-image: radial-gradient(1px 1px at 45px 81px, #fff 90%, transparent), radial-gradient(1.5px 1.5px at 154px 24px, #b6cef5 80%, transparent); background-size: 317px 229px; }
+.starfield::after { content: ""; background: radial-gradient(ellipse at center, rgba(45, 69, 101, .08), transparent 62%); }
 
 .globe-intro { position: absolute; left: 4.3vw; top: 8vh; z-index: 7; width: 330px; pointer-events: none; }
 .globe-intro h1, .index-hero h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; line-height: .92; letter-spacing: -.055em; margin: 18px 0 17px; }
@@ -303,7 +300,7 @@ tr:hover .row-action { color: #1d382e; border-color: #99a79f; transform: transla
 
 @media (max-width: 1180px) {
   .globe-intro { left: 3vw; width: 270px; }
-  .globe-stage { margin-left: 12vw; width: 80vw; }
+  .globe-stage { margin-left: 0; width: 100%; }
   .layer-panel { right: 1.4vw; width: 260px; }
   .globe-metrics { left: 3vw; }
   .country-card { left: 3vw; }

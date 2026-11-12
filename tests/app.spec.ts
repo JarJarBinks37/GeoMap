@@ -51,3 +51,17 @@ test('desktop composition is visually stable', async ({ page }) => {
   await page.getByRole('button', { name: /country index/i }).click();
   await page.screenshot({ path: '/tmp/geomap-index.png', fullPage: true });
 });
+
+test('globe canvas stays centered on high-density displays', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await page.goto('/');
+  const stage = await page.locator('.globe-stage').boundingBox();
+  const canvas = await page.locator('canvas').boundingBox();
+  expect(stage).not.toBeNull();
+  expect(canvas).not.toBeNull();
+  expect(canvas!.width).toBeCloseTo(stage!.width, 0);
+  expect(canvas!.height).toBeCloseTo(stage!.height, 0);
+  expect(canvas!.x).toBeCloseTo(0, 0);
+  await context.close();
+});
