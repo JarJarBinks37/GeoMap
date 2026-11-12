@@ -38,8 +38,6 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
@@ -49,3 +47,21 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify the published website
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          for attempt in {1..12}; do
+            status=$(curl --silent --location --output /tmp/geomap.html --write-out "%{http_code}" "$SITE_URL")
+            if [ "$status" = "200" ] && grep --quiet "Terra — World Field Guide" /tmp/geomap.html; then
+              asset_path=$(grep --only-matching --extended-regexp 'src="[^"]+\.js"' /tmp/geomap.html | head -1 | cut -d'"' -f2)
+              curl --fail --silent --show-error "https://jarjarbinks37.github.io${asset_path}" --output /dev/null
+              echo "Verified $SITE_URL and ${asset_path}"
+              exit 0
+            fi
+            echo "Attempt $attempt: site returned HTTP $status; retrying..."
+            sleep 10
+          done
+          echo "Published site did not become ready in time."
+          exit 1
