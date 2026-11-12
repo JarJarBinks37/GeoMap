@@ -292,6 +292,15 @@ tr:hover .row-action { color: #1d382e; border-color: #99a79f; transform: transla
 .data-note { color: #8a928e; font-size: 8px; letter-spacing: .05em; margin: 12px 0 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
+/* The globe occupies the full stage; controls float above it. */
+.globe-stage { width: 100%; margin: 0; }
+.layer-panel { top: 88px; }
+.panel-toggle, .zoom-controls button { border: 1px solid var(--line); background: rgba(9,22,18,.9); color: #e7e3d7; cursor: pointer; }
+.panel-toggle { position: absolute; right: 2.3vw; top: 24px; z-index: 12; padding: 11px 14px; display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.zoom-controls { position: absolute; right: 2.3vw; bottom: 35px; z-index: 12; display: grid; }
+.zoom-controls button { width: 40px; height: 40px; display: grid; place-items: center; }
+.zoom-controls button:hover, .panel-toggle:hover { color: var(--gold); }
+
 @media (max-width: 1180px) {
   .globe-intro { left: 3vw; width: 270px; }
   .globe-stage { margin-left: 12vw; width: 80vw; }
@@ -311,12 +320,16 @@ tr:hover .row-action { color: #1d382e; border-color: #99a79f; transform: transla
   .globe-intro { top: 30px; left: 22px; width: 250px; }
   .globe-intro h1 { font-size: 52px; margin-top: 12px; }
   .globe-intro p { display: none; }
-  .globe-stage { margin-left: -20vw; width: 140vw; height: calc(100vh - 124px); min-height: 600px; }
+  .globe-stage { margin-left: 0; width: 100%; height: calc(100vh - 124px); min-height: 520px; }
   .layer-panel { right: 14px; top: auto; bottom: 78px; width: 245px; max-height: 320px; overflow-y: auto; }
   .panel-heading { min-height: 52px; padding: 12px 16px; }
   .panel-section { padding-top: 10px; }
   .controls-section, .panel-actions { display: none; }
-  .globe-metrics { display: none; }
+  .globe-metrics { display: flex; left: 16px; bottom: 75px; gap: 8px; }
+  .globe-metrics span { font-size: 16px; }
+  .globe-metrics small { font-size: 6px; }
+  .panel-toggle { top: 14px; right: 14px; }
+  .zoom-controls { right: 14px; bottom: 80px; }
   .country-card { left: 16px; top: auto; bottom: 78px; width: calc(100vw - 32px); max-width: 320px; }
   .drag-hint { bottom: 17px; }
   .index-page { padding-bottom: 58px; }

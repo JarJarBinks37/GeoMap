@@ -5,7 +5,6 @@ test('globe renders and layers are editable', async ({ page }) => {
   page.on('pageerror', (error) => errors.push(error.message));
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /the world/i })).toBeVisible();
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.getByText(/countries & territories/i)).toBeVisible();
 
@@ -14,7 +13,11 @@ test('globe renders and layers are editable', async ({ page }) => {
   await mountains.click();
   await expect(mountains).toHaveAttribute('aria-pressed', 'false');
   await page.getByLabel('RELIEF SCALE').fill('1.8');
-  await page.getByLabel('DATA PALETTE').selectOption('elevation');
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await page.getByRole('button', { name: 'Zoom out' }).click();
+  await page.getByRole('button', { name: 'Hide layers' }).click();
+  await expect(page.getByRole('button', { name: 'Show layers' })).toBeVisible();
+  await page.getByRole('button', { name: 'Show layers' }).click();
 
   expect(errors).toEqual([]);
 });

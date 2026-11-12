@@ -5,14 +5,10 @@ import ThreeGlobe from 'three-globe';
 import { feature } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
 import {
-  continentColors,
   countries,
   countriesByNumericCode,
   type Country,
 } from '../data/countries';
-import { mountainPoints } from '../data/mountains';
-
-export type Palette = 'terrain' | 'elevation' | 'population';
 
 interface GlobeCanvasProps {
   selectedCountry: Country | null;
@@ -23,8 +19,8 @@ interface GlobeCanvasProps {
   atmosphere: boolean;
   autoRotate: boolean;
   relief: number;
-  palette: Palette;
   resetSignal: number;
+  zoomSignal: number;
 }
 
 interface GeoFeature {
@@ -41,17 +37,6 @@ const geoFeatures = (
   feature(topology as never, topology.objects.countries as never) as unknown as { features: GeoFeature[] }
 ).features;
 
-function colorForCountry(country: Country | undefined, palette: Palette) {
-  if (!country) return '#384b43';
-  if (palette === 'terrain') return continentColors[country.continent];
-  if (palette === 'population') {
-    const intensity = Math.min(1, Math.log10(country.population + 1) / 9.4);
-    return new THREE.Color('#284a46').lerp(new THREE.Color('#f0b75b'), intensity).getStyle();
-  }
-  const intensity = Math.min(1, country.averageElevation / 2600);
-  return new THREE.Color('#638f83').lerp(new THREE.Color('#e4c17a'), intensity).getStyle();
-}
-
 export function GlobeCanvas({
   selectedCountry,
   onSelectCountry,
@@ -61,8 +46,8 @@ export function GlobeCanvas({
   atmosphere,
   autoRotate,
   relief,
-  palette,
   resetSignal,
+  zoomSignal,
 }: GlobeCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<ThreeGlobe | null>(null);
@@ -93,14 +78,20 @@ export function GlobeCanvas({
       .showAtmosphere(true)
       .atmosphereColor('#78bca9')
       .atmosphereAltitude(0.16)
-      .showGraticules(true)
+      .showGraticules(false)
       .polygonsData(geoFeatures);
 
     const globeMaterial = globe.globeMaterial() as THREE.MeshPhongMaterial;
-    globeMaterial.color = new THREE.Color('#0b2422');
-    globeMaterial.emissive = new THREE.Color('#061714');
-    globeMaterial.emissiveIntensity = 0.55;
-    globeMaterial.shininess = 6;
+    const textureLoader = new THREE.TextureLoader();
+    const earthTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/earth.jpg`);
+    earthTexture.colorSpace = THREE.SRGBColorSpace;
+    const elevationTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/elevation.png`);
+    globeMaterial.map = earthTexture;
+    globeMaterial.bumpMap = elevationTexture;
+    globeMaterial.bumpScale = 1.5;
+    globeMaterial.color = new THREE.Color('#ffffff');
+    globeMaterial.shininess = 4;
+    globeMaterial.needsUpdate = true;
 
     globe
       .labelLat((item: Country) => item.lat)
@@ -109,29 +100,7 @@ export function GlobeCanvas({
       .labelColor(() => '#e8e0ce')
       .labelSize((item: Country) => (item.population > 80_000_000 ? 0.72 : 0.5))
       .labelDotRadius(0.24)
-      .labelAltitude(0.025)
-      .customThreeObject((item: (typeof mountainPoints)[number]) => {
-        const size = item.primary ? 1.95 : 1.1;
-        const height = Math.max(2.1, (item.height / 8849) * 7.4);
-        const geometry = new THREE.ConeGeometry(size, height, item.primary ? 7 : 5);
-        geometry.translate(0, height / 2, 0);
-        const material = new THREE.MeshStandardMaterial({
-          color: item.primary ? '#f2c468' : '#c98954',
-          emissive: '#38200e',
-          emissiveIntensity: 0.18,
-          roughness: 0.78,
-          flatShading: true,
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.userData.baseHeight = height;
-        return mesh;
-      })
-      .customThreeObjectUpdate((object, item: (typeof mountainPoints)[number]) => {
-        const coords = globe.getCoords(item.lat, item.lng, 0.008);
-        const outward = new THREE.Vector3(coords.x, coords.y, coords.z).normalize();
-        object.position.set(coords.x, coords.y, coords.z);
-        object.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), outward);
-      });
+      .labelAltitude(0.025);
 
     scene.add(globe);
     scene.add(new THREE.HemisphereLight('#dff8ef', '#07100e', 2.1));
@@ -210,6 +179,8 @@ export function GlobeCanvas({
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.dispose();
+      earthTexture.dispose();
+      elevationTexture.dispose();
       mount.removeChild(renderer.domElement);
     };
   }, []);
@@ -219,31 +190,34 @@ export function GlobeCanvas({
     const controls = controlsRef.current;
     if (!globe || !controls) return;
     controls.autoRotate = autoRotate;
+    const material = globe.globeMaterial() as THREE.MeshPhongMaterial;
+    material.bumpScale = mountains ? relief * 1.5 : 0;
     globe
       .showAtmosphere(atmosphere)
       .polygonCapColor((item: GeoFeature) => {
         const country = countriesByNumericCode.get(Number(item.id));
-        if (country?.code === selectedCountry?.code) return '#f5e1a4';
-        return colorForCountry(country, palette);
+        return country?.code === selectedCountry?.code ? 'rgba(244, 226, 164, 0.28)' : 'rgba(0,0,0,0)';
       })
-      .polygonSideColor((item: GeoFeature) => {
-        const country = countriesByNumericCode.get(Number(item.id));
-        return new THREE.Color(colorForCountry(country, palette)).multiplyScalar(0.48).getStyle();
-      })
+      .polygonSideColor(() => 'rgba(0,0,0,0)')
       .polygonStrokeColor(() => (borders ? 'rgba(229, 238, 220, 0.54)' : 'rgba(0,0,0,0)'))
-      .polygonAltitude((item: GeoFeature) => {
-        const country = countriesByNumericCode.get(Number(item.id));
-        if (!country) return 0.008;
-        if (country.code === selectedCountry?.code) return 0.035;
-        return 0.007 + Math.min(0.07, (country.averageElevation / 9000) * 0.12 * relief);
-      })
+      .polygonAltitude(0.002)
       .labelsData(
         labels
           ? countries.filter((country) => country.population > 18_000_000 || country.code === selectedCountry?.code)
           : [],
-      )
-      .customLayerData(mountains ? mountainPoints : []);
-  }, [atmosphere, autoRotate, borders, labels, mountains, palette, relief, selectedCountry]);
+      );
+  }, [atmosphere, autoRotate, borders, labels, mountains, relief, selectedCountry]);
+
+  const lastZoom = useRef(zoomSignal);
+  useEffect(() => {
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls || zoomSignal === lastZoom.current) return;
+    const factor = zoomSignal > lastZoom.current ? 0.8 : 1.25;
+    camera.position.setLength(THREE.MathUtils.clamp(camera.position.length() * factor, controls.minDistance, controls.maxDistance));
+    lastZoom.current = zoomSignal;
+    controls.update();
+  }, [zoomSignal]);
 
   useEffect(() => {
     const camera = cameraRef.current;

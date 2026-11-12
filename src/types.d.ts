@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 declare module 'world-countries' {
   const countries: RawCountry[];
   export default countries;
