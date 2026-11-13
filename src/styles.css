@@ -182,6 +182,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .panel-actions button { background: transparent; border: 0; border-right: 1px solid var(--line); padding: 13px 8px; color: #68766f; font-size: 9px; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; }
 .panel-actions button:last-child { border: 0; }
 .panel-actions button:hover, .panel-actions button.active { color: var(--gold); }
+.mountain-key { display: flex; align-items: center; gap: 11px; padding: 15px 20px; border-bottom: 1px solid var(--line); background: rgba(76, 230, 224, .055); }
+.mountain-key-line { flex: 0 0 29px; height: 4px; border-radius: 3px; background: #4ce6e0; box-shadow: 0 0 0 2px #062c35, 0 0 10px rgba(76, 230, 224, .45); }
+.mountain-key > div { display: grid; gap: 4px; }
+.mountain-key strong { color: #c9f8f3; font-size: 10px; font-weight: 600; }
+.mountain-key small { color: #8aa9a2; font-size: 9px; line-height: 1.35; }
 
 .globe-metrics { position: absolute; left: 4.3vw; bottom: 5.2vh; display: flex; align-items: center; gap: 18px; z-index: 7; }
 .globe-metrics div { display: grid; gap: 3px; }

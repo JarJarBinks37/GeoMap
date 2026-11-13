@@ -127,13 +127,13 @@ export function GlobeCanvas({
       .labelLat((item: GlobeLabel) => item.lat)
       .labelLng((item: GlobeLabel) => item.lng)
       .labelText((item: GlobeLabel) => item.text)
-      .labelColor((item: GlobeLabel) => item.mountain ? '#fff0b2' : '#ffffff')
-      .labelSize((item: GlobeLabel) => item.mountain ? 1.4 : 0.5)
+      .labelColor((item: GlobeLabel) => item.mountain ? '#f8ffff' : '#ffffff')
+      .labelSize((item: GlobeLabel) => item.mountain ? 1.55 : 0.5)
       .labelDotRadius((item: GlobeLabel) => item.mountain ? 0 : 0.24)
       .labelAltitude(0.018)
       .pathPoints((item: GlobePath) => item.points)
-      .pathColor((item: GlobePath) => item.kind === 'border' ? '#d2dad3' : item.kind === 'halo' ? '#34220d' : '#ffd36a')
-      .pathStroke((item: GlobePath) => item.kind === 'border' ? 0.12 : item.kind === 'halo' ? 0.9 : 0.52)
+      .pathColor((item: GlobePath) => item.kind === 'border' ? '#d2dad3' : item.kind === 'halo' ? '#062c35' : '#4ce6e0')
+      .pathStroke((item: GlobePath) => item.kind === 'border' ? 0.12 : item.kind === 'halo' ? 1.8 : 1.05)
       .pathPointAlt((point: number[]) => point[2])
       .pathTransitionDuration(0);
 

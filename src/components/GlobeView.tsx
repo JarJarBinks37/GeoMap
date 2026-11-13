@@ -70,6 +70,8 @@ export function GlobeView({ selectedCountry, onSelectCountry }: GlobeViewProps) 
           <LayerToggle icon={<CloudSun size={17} />} label="Atmosphere" detail="Visual effect" active={atmosphere} onClick={() => setAtmosphere(!atmosphere)} />
         </div>
 
+        {mountains && <div className="mountain-key"><span className="mountain-key-line" /><div><strong>Mountain ranges</strong><small>Approximate outlines · rotate to explore</small></div></div>}
+
         <div className="panel-actions">
           <button onClick={() => setAutoRotate(!autoRotate)} className={autoRotate ? 'active' : ''}>
             <Rotate3D size={15} /> Auto rotate
