@@ -24,4 +24,4 @@ The browser tests use Chromium installed at `/usr/bin/chromium` in the Codex clo
 
 Country, population, elevation, coastline, and flag data are bundled from the installed reference datasets so the app does not depend on a runtime API. Capital populations are clearly marked as rounded prototype estimates. Geographic figures can vary by source and methodology.
 
-Globe imagery and elevation texture are bundled from the three-globe example assets. The terrain layer uses an exaggerated elevation displacement map and shaded relief.
+Globe imagery is bundled from the three-globe example assets. Mountain-range outlines are schematic approximations, not surveyed boundaries.

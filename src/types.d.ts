@@ -29,6 +29,10 @@ declare module 'three-globe' {
     labelSize(value?: number | ((item: any) => number)): this;
     labelAltitude(value?: number | ((item: any) => number)): this;
     labelDotRadius(value?: number | ((item: any) => number)): this;
+    pathsData(value?: object[]): this;
+    pathColor(value?: string | ((item: any) => string)): this;
+    pathStroke(value?: number): this;
+    pathPointAlt(value?: number): this;
     customLayerData(value?: object[]): this;
     customThreeObject(value?: (item: any) => Object3D): this;
     customThreeObjectUpdate(value?: (object: Object3D, item: any) => void): this;

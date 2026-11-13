@@ -28,17 +28,18 @@ export const mountainRanges: MountainRange[] = [
   { name: 'Transantarctic Mountains', lat: -83, lng: 165, peak: 'Mount Kirkpatrick', height: 4528, bearing: 55, spread: 15 },
 ];
 
-export const mountainPoints = mountainRanges.flatMap((range) =>
-  Array.from({ length: 7 }, (_, index) => {
-    const offset = (index - 3) / 3;
-    const radians = (range.bearing * Math.PI) / 180;
-    const distance = offset * range.spread;
-    return {
-      ...range,
-      lat: range.lat + Math.cos(radians) * distance * 0.45,
-      lng: range.lng + Math.sin(radians) * distance,
-      height: range.height * (0.48 + 0.52 * (1 - Math.abs(offset) * 0.62)),
-      primary: index === 3,
-    };
-  }),
-);
+// Schematic envelopes, not surveyed range boundaries. Geographic longitude is
+// scaled by latitude so their shapes remain legible on the globe.
+export const mountainOutlines = mountainRanges.map((range) => {
+  const direction = (range.bearing * Math.PI) / 180;
+  const width = Math.max(0.8, Math.min(2.2, range.spread * 0.16));
+  const longitudeScale = Math.max(0.25, Math.cos((range.lat * Math.PI) / 180));
+  return Array.from({ length: 65 }, (_, index) => {
+    const angle = (index / 64) * Math.PI * 2;
+    const along = Math.cos(angle) * range.spread;
+    const across = Math.sin(angle) * width;
+    const lat = Math.max(-89, Math.min(89, range.lat + along * Math.cos(direction) - across * Math.sin(direction)));
+    const lng = range.lng + (along * Math.sin(direction) + across * Math.cos(direction)) / longitudeScale;
+    return [lat, ((lng + 540) % 360) - 180];
+  });
+});

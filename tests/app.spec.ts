@@ -12,7 +12,9 @@ test('globe renders and layers are editable', async ({ page }) => {
   await expect(mountains).toHaveAttribute('aria-pressed', 'true');
   await mountains.click();
   await expect(mountains).toHaveAttribute('aria-pressed', 'false');
-  await page.getByLabel('RELIEF SCALE').fill('1.8');
+  await expect(page.getByLabel('RELIEF SCALE')).toHaveCount(0);
+  await mountains.click();
+  await expect(mountains).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Zoom in' }).click();
   await page.getByRole('button', { name: 'Zoom out' }).click();
   await page.getByRole('button', { name: 'Hide layers' }).click();

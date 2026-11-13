@@ -31,7 +31,6 @@ export function GlobeView({ selectedCountry, onSelectCountry }: GlobeViewProps) 
   const [borders, setBorders] = useState(true);
   const [atmosphere, setAtmosphere] = useState(true);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [relief, setRelief] = useState(1);
   const [panelOpen, setPanelOpen] = useState(true);
   const [zoomSignal, setZoomSignal] = useState(0);
   const [resetSignal, setResetSignal] = useState(0);
@@ -49,7 +48,6 @@ export function GlobeView({ selectedCountry, onSelectCountry }: GlobeViewProps) 
           borders={borders}
           atmosphere={atmosphere}
           autoRotate={autoRotate}
-          relief={relief}
           resetSignal={resetSignal}
           zoomSignal={zoomSignal}
         />
@@ -66,15 +64,10 @@ export function GlobeView({ selectedCountry, onSelectCountry }: GlobeViewProps) 
 
         <div className="panel-section">
           <span className="section-label">VISIBLE LAYERS</span>
-          <LayerToggle icon={<Mountain size={17} />} label="Mountain ranges" detail={`${mountainRanges.length} systems`} active={mountains} onClick={() => setMountains(!mountains)} />
+          <LayerToggle icon={<Mountain size={17} />} label="Mountain ranges" detail={`${mountainRanges.length} approximate outlines`} active={mountains} onClick={() => setMountains(!mountains)} />
           <LayerToggle icon={<Map size={17} />} label="Country borders" detail="Political" active={borders} onClick={() => setBorders(!borders)} />
           <LayerToggle icon={<Tag size={17} />} label="Country labels" detail="Major nations" active={labels} onClick={() => setLabels(!labels)} />
           <LayerToggle icon={<CloudSun size={17} />} label="Atmosphere" detail="Visual effect" active={atmosphere} onClick={() => setAtmosphere(!atmosphere)} />
-        </div>
-
-        <div className="panel-section controls-section">
-          <label htmlFor="relief"><span><Mountain size={14} /> RELIEF SCALE</span><b>{relief.toFixed(1)}×</b></label>
-          <input id="relief" type="range" min="0.3" max="2.2" step="0.1" value={relief} onChange={(event) => setRelief(Number(event.target.value))} />
         </div>
 
         <div className="panel-actions">
@@ -92,7 +85,7 @@ export function GlobeView({ selectedCountry, onSelectCountry }: GlobeViewProps) 
         <i />
         <div><span>{mountainRanges.length}</span><small>MOUNTAIN SYSTEMS</small></div>
         <i />
-        <div><span>3D</span><small>EDITABLE RELIEF</small></div>
+        <div><span>3D</span><small>INTERACTIVE GLOBE</small></div>
       </div>
 
       {selectedCountry && (

@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import ThreeGlobe from 'three-globe';
 import { feature } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
+import { mountainOutlines, mountainRanges } from '../data/mountains';
 import {
   countries,
   countriesByNumericCode,
@@ -18,7 +19,6 @@ interface GlobeCanvasProps {
   borders: boolean;
   atmosphere: boolean;
   autoRotate: boolean;
-  relief: number;
   resetSignal: number;
   zoomSignal: number;
 }
@@ -28,6 +28,8 @@ interface GeoFeature {
   properties: { name?: string };
   geometry: unknown;
 }
+
+interface GlobeLabel { lat: number; lng: number; text: string; mountain: boolean }
 
 const topology = world as unknown as {
   objects: { countries: object };
@@ -45,7 +47,6 @@ export function GlobeCanvas({
   borders,
   atmosphere,
   autoRotate,
-  relief,
   resetSignal,
   zoomSignal,
 }: GlobeCanvasProps) {
@@ -75,7 +76,7 @@ export function GlobeCanvas({
     mount.appendChild(renderer.domElement);
 
     const globe = new ThreeGlobe()
-      .globeCurvatureResolution(0.5)
+      .globeCurvatureResolution(1)
       .showAtmosphere(true)
       .atmosphereColor('#78bca9')
       .atmosphereAltitude(0.16)
@@ -105,24 +106,22 @@ export function GlobeCanvas({
       texture.needsUpdate = true;
     });
     earthTexture.colorSpace = THREE.SRGBColorSpace;
-    const elevationTexture = textureLoader.load(`${import.meta.env.BASE_URL}textures/elevation.png`);
     globeMaterial.map = earthTexture;
-    globeMaterial.bumpMap = elevationTexture;
-    globeMaterial.displacementMap = elevationTexture;
-    globeMaterial.displacementScale = 6;
-    globeMaterial.bumpScale = 1.5;
     globeMaterial.color = new THREE.Color('#ffffff');
     globeMaterial.shininess = 4;
     globeMaterial.needsUpdate = true;
 
     globe
-      .labelLat((item: Country) => item.lat)
-      .labelLng((item: Country) => item.lng)
-      .labelText((item: Country) => item.code)
-      .labelColor(() => '#e8e0ce')
-      .labelSize((item: Country) => (item.population > 80_000_000 ? 0.72 : 0.5))
-      .labelDotRadius(0.24)
-      .labelAltitude(0.025);
+      .labelLat((item: GlobeLabel) => item.lat)
+      .labelLng((item: GlobeLabel) => item.lng)
+      .labelText((item: GlobeLabel) => item.text)
+      .labelColor((item: GlobeLabel) => item.mountain ? '#ffdb8c' : '#ffffff')
+      .labelSize((item: GlobeLabel) => item.mountain ? 1.05 : 0.5)
+      .labelDotRadius((item: GlobeLabel) => item.mountain ? 0 : 0.24)
+      .labelAltitude(0.012)
+      .pathColor(() => '#ffd078')
+      .pathStroke(0.18)
+      .pathPointAlt(0.006);
 
     scene.add(globe);
     scene.add(new THREE.HemisphereLight('#dff8ef', '#07100e', 2.1));
@@ -202,7 +201,6 @@ export function GlobeCanvas({
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.dispose();
       earthTexture.dispose();
-      elevationTexture.dispose();
       mount.removeChild(renderer.domElement);
     };
   }, []);
@@ -212,9 +210,6 @@ export function GlobeCanvas({
     const controls = controlsRef.current;
     if (!globe || !controls) return;
     controls.autoRotate = autoRotate;
-    const material = globe.globeMaterial() as THREE.MeshPhongMaterial;
-    material.bumpScale = mountains ? relief * 1.5 : 0;
-    material.displacementScale = mountains ? relief * 6 : 0;
     globe
       .showAtmosphere(atmosphere)
       .polygonCapColor((item: GeoFeature) => {
@@ -224,12 +219,12 @@ export function GlobeCanvas({
       .polygonSideColor(() => 'rgba(0,0,0,0)')
       .polygonStrokeColor(() => (borders ? 'rgba(229, 238, 220, 0.54)' : 'rgba(0,0,0,0)'))
       .polygonAltitude(0.002)
-      .labelsData(
-        labels
-          ? countries.filter((country) => country.population > 18_000_000 || country.code === selectedCountry?.code)
-          : [],
-      );
-  }, [atmosphere, autoRotate, borders, labels, mountains, relief, selectedCountry]);
+      .pathsData(mountains ? mountainOutlines : [])
+      .labelsData([
+        ...(labels ? countries.filter((country) => country.population > 18_000_000 || country.code === selectedCountry?.code).map((country) => ({ lat: country.lat, lng: country.lng, text: country.code, mountain: false })) : []),
+        ...(mountains ? mountainRanges.map((range) => ({ lat: range.lat, lng: range.lng, text: range.name, mountain: true })) : []),
+      ]);
+  }, [atmosphere, autoRotate, borders, labels, mountains, selectedCountry]);
 
   const lastZoom = useRef(zoomSignal);
   useEffect(() => {
