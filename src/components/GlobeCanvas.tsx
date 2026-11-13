@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import ThreeGlobe from 'three-globe';
-import { feature } from 'topojson-client';
+import { feature, mesh } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
 import { mountainOutlines, mountainRanges } from '../data/mountains';
 import {
@@ -30,6 +30,7 @@ interface GeoFeature {
 }
 
 interface GlobeLabel { lat: number; lng: number; text: string; mountain: boolean }
+interface GlobePath { points: number[][]; kind: 'border' | 'mountain' | 'halo' }
 
 const topology = world as unknown as {
   objects: { countries: object };
@@ -38,6 +39,15 @@ const topology = world as unknown as {
 const geoFeatures = (
   feature(topology as never, topology.objects.countries as never) as unknown as { features: GeoFeature[] }
 ).features;
+
+// TopoJSON's mesh draws shared borders once instead of overlapping two country edges.
+const borderPaths: GlobePath[] = mesh(topology as never, topology.objects.countries as never).coordinates.map(
+  (line) => ({ kind: 'border', points: line.map(([lng, lat]) => [lat, lng, 0.009]) }),
+);
+const rangePaths: GlobePath[] = mountainOutlines.flatMap((points) => [
+  { kind: 'halo' as const, points: points.map(([lat, lng]) => [lat, lng, 0.012]) },
+  { kind: 'mountain' as const, points: points.map(([lat, lng]) => [lat, lng, 0.016]) },
+]);
 
 export function GlobeCanvas({
   selectedCountry,
@@ -55,6 +65,8 @@ export function GlobeCanvas({
   const controlsRef = useRef<OrbitControls | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const selectRef = useRef(onSelectCountry);
+  const invisibleCap = useRef(new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+  const selectedCap = useRef(new THREE.MeshBasicMaterial({ color: '#f4e2a4', transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide }));
 
   useEffect(() => {
     selectRef.current = onSelectCountry;
@@ -115,13 +127,15 @@ export function GlobeCanvas({
       .labelLat((item: GlobeLabel) => item.lat)
       .labelLng((item: GlobeLabel) => item.lng)
       .labelText((item: GlobeLabel) => item.text)
-      .labelColor((item: GlobeLabel) => item.mountain ? '#ffdb8c' : '#ffffff')
-      .labelSize((item: GlobeLabel) => item.mountain ? 1.05 : 0.5)
+      .labelColor((item: GlobeLabel) => item.mountain ? '#fff0b2' : '#ffffff')
+      .labelSize((item: GlobeLabel) => item.mountain ? 1.4 : 0.5)
       .labelDotRadius((item: GlobeLabel) => item.mountain ? 0 : 0.24)
-      .labelAltitude(0.012)
-      .pathColor(() => '#ffd078')
-      .pathStroke(0.18)
-      .pathPointAlt(0.006);
+      .labelAltitude(0.018)
+      .pathPoints((item: GlobePath) => item.points)
+      .pathColor((item: GlobePath) => item.kind === 'border' ? '#d2dad3' : item.kind === 'halo' ? '#34220d' : '#ffd36a')
+      .pathStroke((item: GlobePath) => item.kind === 'border' ? 0.12 : item.kind === 'halo' ? 0.9 : 0.52)
+      .pathPointAlt((point: number[]) => point[2])
+      .pathTransitionDuration(0);
 
     scene.add(globe);
     scene.add(new THREE.HemisphereLight('#dff8ef', '#07100e', 2.1));
@@ -212,14 +226,14 @@ export function GlobeCanvas({
     controls.autoRotate = autoRotate;
     globe
       .showAtmosphere(atmosphere)
-      .polygonCapColor((item: GeoFeature) => {
+      .polygonCapMaterial((item: GeoFeature) => {
         const country = countriesByNumericCode.get(Number(item.id));
-        return country?.code === selectedCountry?.code ? 'rgba(244, 226, 164, 0.28)' : 'rgba(0,0,0,0)';
+        return country?.code === selectedCountry?.code ? selectedCap.current : invisibleCap.current;
       })
       .polygonSideColor(() => 'rgba(0,0,0,0)')
-      .polygonStrokeColor(() => (borders ? 'rgba(229, 238, 220, 0.54)' : 'rgba(0,0,0,0)'))
+      .polygonStrokeColor(() => 'rgba(0,0,0,0)')
       .polygonAltitude(0.002)
-      .pathsData(mountains ? mountainOutlines : [])
+      .pathsData([...(borders ? borderPaths : []), ...(mountains ? rangePaths : [])])
       .labelsData([
         ...(labels ? countries.filter((country) => country.population > 18_000_000 || country.code === selectedCountry?.code).map((country) => ({ lat: country.lat, lng: country.lng, text: country.code, mountain: false })) : []),
         ...(mountains ? mountainRanges.map((range) => ({ lat: range.lat, lng: range.lng, text: range.name, mountain: true })) : []),

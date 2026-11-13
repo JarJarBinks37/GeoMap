@@ -17,6 +17,7 @@ declare module 'three-globe' {
     polygonsData(value?: object[]): this;
     polygonAltitude(value?: number | ((item: any) => number)): this;
     polygonCapColor(value?: string | ((item: any) => string)): this;
+    polygonCapMaterial(value: (item: any) => Material): this;
     polygonSideColor(value?: string | ((item: any) => string)): this;
     polygonStrokeColor(value?: string | ((item: any) => string)): this;
     polygonLabel(value?: string | ((item: any) => string)): this;
@@ -30,9 +31,11 @@ declare module 'three-globe' {
     labelAltitude(value?: number | ((item: any) => number)): this;
     labelDotRadius(value?: number | ((item: any) => number)): this;
     pathsData(value?: object[]): this;
+    pathPoints(value: string | ((item: any) => number[][])): this;
     pathColor(value?: string | ((item: any) => string)): this;
-    pathStroke(value?: number): this;
-    pathPointAlt(value?: number): this;
+    pathStroke(value?: number | ((item: any) => number)): this;
+    pathPointAlt(value?: number | ((point: any) => number)): this;
+    pathTransitionDuration(value: number): this;
     customLayerData(value?: object[]): this;
     customThreeObject(value?: (item: any) => Object3D): this;
     customThreeObjectUpdate(value?: (object: Object3D, item: any) => void): this;
