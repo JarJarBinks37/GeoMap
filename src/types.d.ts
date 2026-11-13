@@ -6,10 +6,12 @@ declare module 'world-countries' {
 }
 
 declare module 'three-globe' {
-  import { Object3D, Material } from 'three';
+  import { Object3D, Material, Vector2, Camera } from 'three';
   export default class ThreeGlobe extends Object3D {
     globeMaterial(): Material;
     globeCurvatureResolution(value: number): this;
+    rendererSize(value: Vector2): this;
+    setPointOfView(camera: Camera): this;
     showAtmosphere(value?: boolean): this;
     atmosphereColor(value?: string): this;
     atmosphereAltitude(value?: number): this;

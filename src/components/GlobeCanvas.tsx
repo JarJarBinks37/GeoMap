@@ -132,8 +132,8 @@ export function GlobeCanvas({
       .labelDotRadius((item: GlobeLabel) => item.mountain ? 0 : 0.24)
       .labelAltitude(0.018)
       .pathPoints((item: GlobePath) => item.points)
-      .pathColor((item: GlobePath) => item.kind === 'border' ? '#d2dad3' : item.kind === 'halo' ? '#062c35' : '#4ce6e0')
-      .pathStroke((item: GlobePath) => item.kind === 'border' ? 0.12 : item.kind === 'halo' ? 1.8 : 1.05)
+      .pathColor((item: GlobePath) => item.kind === 'border' ? '#fff7dc' : item.kind === 'halo' ? '#062c35' : '#4ce6e0')
+      .pathStroke((item: GlobePath) => item.kind === 'border' ? 2.5 : item.kind === 'halo' ? 5 : 2.5)
       .pathPointAlt((point: number[]) => point[2])
       .pathTransitionDuration(0);
 
@@ -154,6 +154,7 @@ export function GlobeCanvas({
     controls.maxDistance = 430;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.46;
+    controls.addEventListener('change', () => globe.setPointOfView(camera));
     controlsRef.current = controls;
 
     globeRef.current = globe;
@@ -192,6 +193,7 @@ export function GlobeCanvas({
       const { width, height } = mount.getBoundingClientRect();
       if (!width || !height) return;
       renderer.setSize(width, height);
+      globe.rendererSize(new THREE.Vector2(width, height));
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
